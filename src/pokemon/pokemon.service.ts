@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Model } from 'mongoose';
@@ -13,10 +13,16 @@ export class PokemonService {
   ) {}
 
   async create(createPokemonDto: CreatePokemonDto) {
-    createPokemonDto.name = createPokemonDto.name.toLocaleLowerCase();
-    const pokemon = await this.pokemonModel.create(createPokemonDto);
+    try {
+      createPokemonDto.name = createPokemonDto.name.toLocaleLowerCase();
+      const pokemon = await this.pokemonModel.create(createPokemonDto);
 
-    return pokemon;
+      return pokemon;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `ERROR: No se ha podido insertar ${error}`,
+      );
+    }
   }
 
   findAll() {
