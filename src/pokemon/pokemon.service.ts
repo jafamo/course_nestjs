@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -8,6 +9,7 @@ import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { isValidObjectId, Model } from 'mongoose';
 import { Pokemon } from './entities/pokemon.entity';
 import { InjectModel } from '@nestjs/mongoose';
+import { json } from 'stream/consumers';
 
 @Injectable()
 export class PokemonService {
@@ -69,5 +71,17 @@ export class PokemonService {
 
   remove(id: number) {
     return `This action removes a #${id} pokemon`;
+  }
+
+  private handleExceptions(error: any) {
+    if (error.code === 11000) {
+      throw new BadRequestException(
+        `Pokemon exist in db ${JSON.stringify(error.KeyValue)}`
+      );
+    }
+    console.log(error);
+    throw new InternalServerErrorException(
+      `can't create pockemon, check error log`,
+    );
   }
 }
