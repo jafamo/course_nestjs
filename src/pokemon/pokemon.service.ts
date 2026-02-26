@@ -9,7 +9,7 @@ import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { isValidObjectId, Model } from 'mongoose';
 import { Pokemon } from './entities/pokemon.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { json } from 'stream/consumers';
+import { ParseMongoIdPipe } from 'src/common/pipes/parse-mongo-id/parse-mongo-id.pipe';
 
 @Injectable()
 export class PokemonService {
@@ -69,8 +69,12 @@ export class PokemonService {
     //return pokemon;//esto retorna el que no esta actualizado
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pokemon`;
+  async remove(term: string) {
+    //const result = await this.pokemonModel.findByIdAndDelete(term);
+    const { deletedCount } = await this.pokemonModel.deleteOne({ _id: term }); //deletedCount es un valor que viene del deleteOne
+    if (deletedCount === 0) {
+      throw new BadRequestException(`Pokemon not found with this id: ${term}`);
+    }
   }
 
   private handleExceptions(error: any) {
